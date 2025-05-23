@@ -2,18 +2,20 @@
 session_start();
 include 'mydb.php';
 
+// Kolla om användaren är inloggad och admin, annars stoppa
 if (!isset($_SESSION['user_id']) || $_SESSION['is_admin'] != 1) {
     die("Du har inte behörighet.");
 }
 
-$result = $conn->query("SELECT t.id, u.username, t.subject, t.message, t.status 
-                        FROM tickets t 
-                        JOIN users u ON t.user_id = u.id");
+// Hämta alla supporttickets och tillhörande användarnamn
+$result = $conn->query("SELECT t.id, u.username, t.subject, t.message, t.status FROM tickets t JOIN users u ON t.user_id = u.id");
 
+// Loopa igenom tickets och skriv ut dem
 while ($row = $result->fetch_assoc()) {
     echo "<div><strong>{$row['username']}</strong> - {$row['subject']} - Status: {$row['status']}<br>{$row['message']}<hr></div>";
 }
 ?>
+
 
 <html lang="sv">
 <head>

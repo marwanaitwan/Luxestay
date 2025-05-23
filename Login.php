@@ -2,32 +2,38 @@
 include 'mydb.php';
 session_start();
 
+// Kolla om formuläret skickats
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username = $_POST['username'];
     $password = $_POST['password'];
 
+    // Hämta användarinfo från databasen baserat på användarnamn
     $stmt = $conn->prepare("SELECT id, password, is_admin FROM users WHERE username = ?");
     $stmt->bind_param("s", $username);
     $stmt->execute();
     $stmt->store_result();
 
+    // Om användaren finns
     if ($stmt->num_rows == 1) {
-        $stmt->bind_result($id, $hashed_password, $is_admin);
+        $stmt->bind_result($id, $password_hash, $is_admin);
         $stmt->fetch();
-        if (password_verify($password, $hashed_password)) {
+
+        // Kolla att lösenordet stämmer med hash från databasen
+        if (password_verify($password, $password_hash)) {
+            // Spara inloggning i session och admin-status
             $_SESSION['user_id'] = $id;
-            $_SESSION['username'] = $username;
             $_SESSION['is_admin'] = $is_admin;
-            header("Location: hemsida.php");
+            header("Location: hemsida.php"); // Skicka till startsidan
             exit();
         } else {
-            echo "Fel lösenord.";
+            echo "Fel lösenord!";
         }
     } else {
-        echo "Användaren finns inte.";
+        echo "Användare finns ej.";
     }
 }
 ?>
+
 
 <html lang="sv">
 <head>

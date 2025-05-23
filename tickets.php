@@ -2,26 +2,32 @@
 session_start();
 include 'mydb.php';
 
+// Kolla om användaren är inloggad, annars skicka till login.php
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
 
+// Variabel för att visa lyckat-meddelande efter skickad ticket
 $success = false;
 
+// När formuläret skickas in
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $subject = $_POST['subject'];
     $message = $_POST['message'];
     $user_id = $_SESSION['user_id'];
 
+    // Förbered och kör SQL-frågan för att spara ticketen
     $stmt = $conn->prepare("INSERT INTO tickets (user_id, subject, message) VALUES (?, ?, ?)");
     $stmt->bind_param("iss", $user_id, $subject, $message);
     $stmt->execute();
 
+    // Redirecta för att undvika att form skickas flera gånger vid reload
     header("Location: tickets.php?sent=1");
     exit();
 }
 
+// Om URL:en har sent=1 betyder det att ticket skickades
 if (isset($_GET['sent'])) {
     $success = true;
 }
@@ -33,64 +39,25 @@ if (isset($_GET['sent'])) {
     <title>Support - LuxeStay</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f3f3f3;
-            margin: 0;
-            padding: 0;
-        }
-        header {
-            background-color: #1c1c1c;
-            color: white;
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        header a {
-            color: white;
-            text-decoration: none;
-            font-size: 24px;
-            font-weight: bold;
-        }
-        main {
-            max-width: 600px;
-            margin: 40px auto;
-            padding: 25px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        form label {
-            font-weight: bold;
-        }
+        /* Enkel styling */
+        body { font-family: Arial, sans-serif; background: #f3f3f3; margin: 0; padding: 0; }
+        header { background: #1c1c1c; color: white; padding: 15px 30px; display: flex; align-items: center; }
+        header a { color: white; text-decoration: none; font-size: 24px; font-weight: bold; }
+        main { max-width: 600px; margin: 40px auto; padding: 25px; background: white; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        form label { font-weight: bold; }
         input[type="text"], textarea {
-            width: 100%;
-            padding: 10px;
-            margin-top: 6px;
-            margin-bottom: 16px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            resize: none;
+            width: 100%; padding: 10px; margin: 6px 0 16px; border: 1px solid #ccc; border-radius: 6px; resize: none;
         }
         button {
-            background-color: #1c1c1c;
-            color: white;
-            padding: 10px 18px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
+            background: #1c1c1c; color: white; padding: 10px 18px; border: none; border-radius: 6px; cursor: pointer;
         }
-        .success-message {
-            color: green;
-            margin-bottom: 20px;
-            font-weight: bold;
-        }
+        .success-message { color: green; margin-bottom: 20px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <header>
+    <!-- Loggan är en länk till startsidan -->
     <a href="hemsida.php">LuxeStay</a>
 </header>
 
@@ -98,9 +65,11 @@ if (isset($_GET['sent'])) {
     <h2>Skicka en supportticket</h2>
 
     <?php if ($success): ?>
-        <p class="success-message">Tack! Din ticket är skickad </p>
+        <!-- Visa tack-meddelande om ticket skickades -->
+        <p class="success-message">Tack! Din ticket är skickad.</p>
     <?php else: ?>
-        <form method="POST">
+        <!-- Ticketformulär -->
+        <form method="POST" action="">
             <label for="subject">Ämne:</label>
             <input type="text" id="subject" name="subject" required>
 
@@ -114,4 +83,3 @@ if (isset($_GET['sent'])) {
 
 </body>
 </html>
-

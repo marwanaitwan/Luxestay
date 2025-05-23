@@ -2,29 +2,36 @@
 session_start();
 include 'mydb.php';
 
+$bookingSuccess = false;
+$errorMessage = '';
+
+// Kolla om användaren är inloggad, annars skicka till login
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
+    header('Location: login.php');
     exit();
 }
 
+// Om bokningsformuläret skickas
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Hämta bokningsdata från formuläret
     $room_number = $_POST['room_number'];
     $start_date = $_POST['start_date'];
     $end_date = $_POST['end_date'];
     $user_id = $_SESSION['user_id'];
 
-    $stmt = $conn->prepare("INSERT INTO bookings (user_id, room_number, start_date, end_date) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("isss", $user_id, $room_number, $start_date, $end_date);
+    // Förbered och kör SQL för att lägga till bokningen
+    $sql = "INSERT INTO bookings (user_id, room_number, start_date, end_date) VALUES (?, ?, ?, ?)";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("iiss", $user_id, $room_number, $start_date, $end_date);
 
     if ($stmt->execute()) {
-        echo "Bokning lyckades!";
+        $bookingSuccess = true; // Bokningen lyckades
     } else {
-        echo "Fel vid bokning: " . $stmt->error;
+        $errorMessage = "Fel vid bokning: " . $stmt->error; // Visa fel
     }
-
-    $stmt->close();
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="sv">

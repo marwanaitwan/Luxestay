@@ -1,13 +1,17 @@
 <?php
 include 'mydb.php';
 
+// Kolla om formuläret skickats
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username = $_POST['username'];
+    // Hasha lösenordet säkert innan databasen
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
 
+    // Förbered SQL för att skapa nytt konto
     $stmt = $conn->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
     $stmt->bind_param("ss", $username, $password);
-
+    
+    // Kör SQL och visa om det gick bra eller ej
     if ($stmt->execute()) {
         echo "Konto skapat! <a href='login.php'>Logga in här</a>";
     } else {
@@ -17,6 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->close();
 }
 ?>
+
 
 
 <html lang="sv">
